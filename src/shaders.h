@@ -2,12 +2,9 @@
 #define SHADERS_H_
 #include "main.h"
 
-typedef struct {
-  unsigned int shaderProgram;
-  unsigned int VAO;
-  unsigned int VBO;
-} ShaderData;
+typedef unsigned int Shader_t;
 
-void Shader_Load(ShaderData *shader_data);
+Shader_t Shader_Load(char *source, uint type);
+unsigned int Shader_Compile(Shader_t vertex_shader, Shader_t fragment_shader);
 
 #endif // SHADERS_H_

@@ -10,6 +10,8 @@ project(glb-viewer)
 
 add_executable(${PROJECT_NAME})
 
+file(CREATE_LINK ${CMAKE_CURRENT_SOURCE_DIR}/src/shaders shaders SYMBOLIC)
+
 set(SOURCES src/main.c src/glad.h src/glad.c src/shaders.c)
 
 add_subdirectory(deps/glfw)
