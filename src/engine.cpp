@@ -1,13 +1,11 @@
 #include "engine.hpp"
 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 Engine::Engine() {
+	wireframeMode = false;
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -36,3 +34,18 @@ Engine::Engine() {
 GLFWwindow* Engine::getWindow() {
 	return window;
 }
+
+void Engine::toggleWireframe() {
+	wireframeMode = !wireframeMode;
+	if (wireframeMode) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+

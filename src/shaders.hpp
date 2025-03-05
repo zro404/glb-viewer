@@ -3,8 +3,8 @@
 #include "main.hpp"
 
 class Shader {
-	unsigned int shaderProgram;
+	unsigned int ID;
 public:
-	Shader();
+	Shader(const char* vertexPath, const char* fragmentPath);
 	void use();
 };
