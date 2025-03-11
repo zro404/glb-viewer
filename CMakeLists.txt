@@ -15,16 +15,17 @@ ADD_CUSTOM_TARGET( copy_shader_files ALL
 project ("glb-viewer")
 
 
-add_executable ("${CMAKE_PROJECT_NAME}" "src/main.cpp" "src/glad.c" "src/engine.cpp" "src/shaders.cpp" "src/stb_image.cpp")
+add_executable ("${CMAKE_PROJECT_NAME}" "src/main.cpp" "src/glad.c" "src/engine.cpp" "src/shaders.cpp" "src/stb_image.cpp"  "src/mesh.cpp" "src/model.cpp")
 
 add_dependencies("${CMAKE_PROJECT_NAME}" copy_shader_files)
 
 add_subdirectory(thirdparty/glfw-3.4)
+add_subdirectory(thirdparty/assimp)
 
 
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PRIVATE "include")
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glfw)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glfw assimp)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET glb-viewer PROPERTY CXX_STANDARD 20)
