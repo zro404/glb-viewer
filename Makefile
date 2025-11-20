@@ -1,12 +1,19 @@
+CC := clang
+CFLAGS := -Wall -Wextra -O2 -Iinclude 
+CDEPS := -lglfw
+
 all: main
 
-main: create_dir
-	clang -c src/*.c
+run: main
+	./bin/viewer
+
+main: create_dir src/*
+	$(CC) $(CFLAGS) -c src/*.c
 	mv *.o bin/obj/
-	clang bin/obj/*.o -o bin/viewer
+	$(CC) $(CDEPS) bin/obj/*.o -o bin/viewer
 
 .PHONY: clean create_dir
 create_dir:
 	mkdir -p bin/obj
-clear:
+clean: 
 	rm -r bin
