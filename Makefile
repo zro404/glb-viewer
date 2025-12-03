@@ -5,7 +5,7 @@ CDEPS := -lglfw -lm
 all: build
 
 run: build
-	./bin/viewer
+	bin/viewer bin/assets/cube.stl
 
 build: create_dir src/*
 	$(CC) $(CFLAGS) -c src/*.c
