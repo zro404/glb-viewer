@@ -7,6 +7,10 @@
 static float width = 800.0f;
 static float height = 600.0f;
 
+static vec3 lightPos = {1.2f, 1.0f, 2.0f};
+static vec3 lightColor = {1.0f, 1.0f, 1.0f};
+static vec3 objectColor = {1.0f, 0.5f, 0.31f};
+
 void framebuffer_size_callback(GLFWwindow *_, int new_width, int new_height) {
   width = new_width;
   height = new_height;
@@ -57,10 +61,17 @@ int main(int argc, char *argv[]) {
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, va.size * 9 * sizeof(float), va.vertices, GL_STATIC_DRAW);
+  // glBufferData(GL_ARRAY_BUFFER, va.size * 9 * sizeof(float), va.vertices,
+  // GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, va.size * 18 * sizeof(float), va.vertices,
+               GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 6 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   // Compile Shaderprogram
   Shaderprogram shaderProgram = createShaderProgram();
@@ -78,7 +89,9 @@ int main(int argc, char *argv[]) {
     glUseProgram(shaderProgram);
 
     mat4 model = GLM_MAT4_IDENTITY;
-    glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), (vec3){0.5f, 1.0f, 0.0f});
+    glm_rotate(model, glm_rad(30.0f), (vec3){0.5f, 1.0f, 0.0f});
+    // glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f),
+    // (vec3){0.5f, 1.0f, 0.0f});
     int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
 
@@ -92,9 +105,18 @@ int main(int argc, char *argv[]) {
     int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection[0]);
 
+    shaderSetVec3(&shaderProgram, "lightColor", lightColor[0], lightColor[1],
+                  lightColor[2]);
+    shaderSetVec3(&shaderProgram, "objectColor", objectColor[0], objectColor[1],
+                  objectColor[2]);
+
+    shaderSetVec3(&shaderProgram, "lightPos", lightPos[0], lightPos[1],
+                  lightPos[2]);
+
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, tex.texture);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    // glDrawArrays(GL_TRIANGLES, 0, 9*va.size);
+    glDrawArrays(GL_TRIANGLES, 0, 18 * va.size);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

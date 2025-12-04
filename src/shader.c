@@ -3,28 +3,47 @@
 const char *vertexShaderSource =
     "#version 460 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aNormal;\n"
     // "layout (location = 2) in vec2 aTexCoord;\n"
     // "out vec2 TexCoord;\n"
+    "out vec3 Normal;\n"
+    "out vec3 FragPos;\n"
+
     "uniform mat4 model;\n"
     "uniform mat4 view;\n"
     "uniform mat4 projection;\n"
     "void main()\n"
     "{\n"
     "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+    "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
+    "   Normal = aNormal;\n"
     // "   TexCoord = aTexCoord;\n"
     "}\0";
 
 const char *fragmentShaderSource =
     "#version 460 core\n"
     "out vec4 FragColor;\n"
+    "in vec3 Normal;\n"
+    "in vec3 FragPos;\n"
     // "in vec2 TexCoord;\n"
     "uniform sampler2D ourTexture;\n"
+    "uniform vec3 objectColor;\n"
+    "uniform vec3 lightColor;\n"
+    "uniform vec3 lightPos;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(0.8f, 0.8f, 0.8f, 1.0f);\n"
+    "   float ambientStrength = 0.1;\n"
+    "   vec3 ambient = ambientStrength * lightColor;\n"
+
+    "   vec3 norm = normalize(Normal);\n"
+    "   vec3 lightDir = normalize(lightPos - FragPos);\n"
+    "   float diff = max(dot(norm, lightDir), 0.0);\n"
+    "   vec3 diffuse = diff * lightColor;\n"
+
+    "   vec3 result = (ambient + diffuse) * objectColor;\n"
+    "   FragColor = vec4(result, 1.0f);\n"
     // "   FragColor = texture(ourTexture, TexCoord);\n"
     "}\0";
-
 
 Shaderprogram createShaderProgram() {
   int success;
@@ -74,4 +93,9 @@ Shaderprogram createShaderProgram() {
   glDeleteShader(fragmentShader);
 
   return shaderProgram;
+}
+
+void shaderSetVec3(Shaderprogram *program, char* name, float x, float y, float z) {
+  int loc = glGetUniformLocation(*program, name);
+  glUniform3f(loc, x, y, z);
 }
