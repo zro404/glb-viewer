@@ -30,7 +30,7 @@ const char *fragmentShaderSource =
     "uniform vec3 lightPos;\n"
     "void main()\n"
     "{\n"
-    "   float ambientStrength = 0.1;\n"
+    "   float ambientStrength = 0.2;\n"
     "   vec3 ambient = ambientStrength * lightColor;\n"
 
     "   vec3 norm = normalize(Normal);\n"

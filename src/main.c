@@ -7,9 +7,11 @@
 static float width = 800.0f;
 static float height = 600.0f;
 
-static vec3 lightPos = {1.2f, 1.0f, 2.0f};
-static vec3 lightColor = {1.0f, 1.0f, 1.0f};
-static vec3 objectColor = {1.0f, 0.5f, 0.31f};
+const float lightDist = 10.0f; 
+// const vec3 lightPos = {1.2f, 1.0f, 2.0f};
+const vec3 lightPos = {1.0f, 0.5f, 1.0f};
+const vec3 lightColor = {1.0f, 1.0f, 1.0f};
+const vec3 objectColor = {1.0f, 0.5f, 0.31f};
 
 void framebuffer_size_callback(GLFWwindow *_, int new_width, int new_height) {
   width = new_width;
@@ -63,7 +65,7 @@ int main(int argc, char *argv[]) {
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   // glBufferData(GL_ARRAY_BUFFER, va.size * 9 * sizeof(float), va.vertices,
   // GL_STATIC_DRAW);
-  glBufferData(GL_ARRAY_BUFFER, va.size * 18 * sizeof(float), va.vertices,
+  glBufferData(GL_ARRAY_BUFFER, va.vertCount * 6 * sizeof(float), va.vertices,
                GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 6 * sizeof(float), (void *)0);
@@ -72,6 +74,11 @@ int main(int argc, char *argv[]) {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 6 * sizeof(float),
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, va.size*3*sizeof(unsigned int), va.indices, GL_STATIC_DRAW);
 
   // Compile Shaderprogram
   Shaderprogram shaderProgram = createShaderProgram();
@@ -91,7 +98,7 @@ int main(int argc, char *argv[]) {
     mat4 model = GLM_MAT4_IDENTITY;
     // glm_rotate(model, glm_rad(30.0f), (vec3){0.5f, 1.0f, 0.0f});
     glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f),
-    (vec3){0.25f, 0.75f, 0.0f});
+               (vec3){0.25f, 0.75f, 0.0f});
     int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
 
@@ -110,13 +117,14 @@ int main(int argc, char *argv[]) {
     shaderSetVec3(&shaderProgram, "objectColor", objectColor[0], objectColor[1],
                   objectColor[2]);
 
-    shaderSetVec3(&shaderProgram, "lightPos", lightPos[0], lightPos[1],
-                  lightPos[2]);
+    shaderSetVec3(&shaderProgram, "lightPos", lightPos[0]*lightDist, lightPos[1]*lightDist,
+                  lightPos[2]*lightDist);
 
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBindTexture(GL_TEXTURE_2D, tex.texture);
-    // glDrawArrays(GL_TRIANGLES, 0, 9*va.size);
-    glDrawArrays(GL_TRIANGLES, 0, 18 * va.size);
+
+    glDrawElements(GL_TRIANGLES, va.size*3 ,GL_UNSIGNED_INT, 0);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

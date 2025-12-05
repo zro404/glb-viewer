@@ -16,34 +16,41 @@ VertexArray parseSTL(char *path) {
 
   VertexArray va;
   fread(&va.size, 4, 1, fptr); // No. of Triangular Faces
-  // va.vertices = (float *)malloc((va.size * 12) * sizeof(float));
-  va.vertices = (float *)malloc((va.size * 18) * sizeof(float));
+  va.vertices = (float *)malloc(va.size * 18 * sizeof(float));
+  va.indices = (unsigned int *)malloc(va.size * 3 * sizeof(unsigned int));
+  va.vertCount = 0;
 
   float normal[3];
+  float vert[3];
 
   for (int i = 0; i < va.size; i++) {
-    // fseek(fptr, 12, SEEK_CUR); // Skip Normal data
-    // fread(va.vertices + (i * 9), 4, 9, fptr);
-    // fread(va.vertices + (i * 12), 4, 12, fptr);
-
     fread(&normal, 4, 3, fptr);
-    fread(va.vertices + (i * 18), 4, 3, fptr);
-    memcpy(va.vertices + (i * 18) + 3, normal, 3 * sizeof(float));
-    fread(va.vertices + (i * 18) + 6, 4, 3, fptr);
-    memcpy(va.vertices + (i * 18) + 9, normal, 3 * sizeof(float));
-    fread(va.vertices + (i * 18) + 12, 4, 3, fptr);
-    memcpy(va.vertices + (i * 18) + 15, normal, 3 * sizeof(float));
+    for (int j = 0; j < 3; j++) {
+      fread(&vert, 4, 3, fptr);
+
+      int idx = -1;
+      for (int k = 0; k < va.vertCount * 6; k += 6) {
+        if (va.vertices[k] == vert[0] && va.vertices[k + 1] == vert[1] &&
+            va.vertices[k + 2] == vert[2]) {
+          idx = k;
+          break;
+        }
+      }
+
+      if (idx > -1) {
+        va.vertices[idx + 3] += normal[0];
+        va.vertices[idx + 4] += normal[1];
+        va.vertices[idx + 5] += normal[2];
+      } else {
+        idx = (va.vertCount++) * 6;
+        memcpy(va.vertices + idx, vert, 3 * sizeof(float));
+        memcpy(va.vertices + idx + 3, normal, 3 * sizeof(float));
+      }
+
+      va.indices[i * 3 + j] = idx/6;
+    }
     fseek(fptr, 2, SEEK_CUR);
   }
-
-  // for (int i = 0; i < va.size*18; i++) {
-  //   float n = *(va.vertices+i);
-  //   if(n>=0) printf(" ");
-  //   printf("%.2f, ", n);
-  //   if((i+1)%6 == 0) {
-  //     printf("\n");
-  //   }
-  // }
 
   return va;
 }
