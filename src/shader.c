@@ -14,10 +14,9 @@ const char *vertexShaderSource =
     "uniform mat4 projection;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
     "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
-    "   Normal = aNormal;\n"
-    // "   TexCoord = aTexCoord;\n"
+    "   Normal = mat3(transpose(inverse(model))) * aNormal;\n"
+    "   gl_Position = projection * view * vec4(FragPos, 1.0);\n"
     "}\0";
 
 const char *fragmentShaderSource =
@@ -25,7 +24,6 @@ const char *fragmentShaderSource =
     "out vec4 FragColor;\n"
     "in vec3 Normal;\n"
     "in vec3 FragPos;\n"
-    // "in vec2 TexCoord;\n"
     "uniform sampler2D ourTexture;\n"
     "uniform vec3 objectColor;\n"
     "uniform vec3 lightColor;\n"
@@ -42,7 +40,6 @@ const char *fragmentShaderSource =
 
     "   vec3 result = (ambient + diffuse) * objectColor;\n"
     "   FragColor = vec4(result, 1.0f);\n"
-    // "   FragColor = texture(ourTexture, TexCoord);\n"
     "}\0";
 
 Shaderprogram createShaderProgram() {
@@ -95,7 +92,8 @@ Shaderprogram createShaderProgram() {
   return shaderProgram;
 }
 
-void shaderSetVec3(Shaderprogram *program, char* name, float x, float y, float z) {
+void shaderSetVec3(Shaderprogram *program, char *name, float x, float y,
+                   float z) {
   int loc = glGetUniformLocation(*program, name);
   glUniform3f(loc, x, y, z);
 }

@@ -89,9 +89,9 @@ int main(int argc, char *argv[]) {
     glUseProgram(shaderProgram);
 
     mat4 model = GLM_MAT4_IDENTITY;
-    glm_rotate(model, glm_rad(30.0f), (vec3){0.5f, 1.0f, 0.0f});
-    // glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f),
-    // (vec3){0.5f, 1.0f, 0.0f});
+    // glm_rotate(model, glm_rad(30.0f), (vec3){0.5f, 1.0f, 0.0f});
+    glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f),
+    (vec3){0.25f, 0.75f, 0.0f});
     int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
 
