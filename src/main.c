@@ -2,16 +2,23 @@
 #include "parser.h"
 #include "shader.h"
 #include "texture.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 static float width = 800.0f;
 static float height = 600.0f;
 
-const float lightDist = 10.0f; 
+const float lightDist = 20.0f;
 // const vec3 lightPos = {1.2f, 1.0f, 2.0f};
 const vec3 lightPos = {1.0f, 0.5f, 1.0f};
-const vec3 lightColor = {1.0f, 1.0f, 1.0f};
-const vec3 objectColor = {1.0f, 0.5f, 0.31f};
+// const vec3 lightColor = {1.0f, 1.0f, 1.0f};
+const vec3 lightColor = {0.98f, 0.73f, 0.67f};
+// const vec3 objectColor = {1.0f, 0.5f, 0.31f};
+const vec3 objectColor = {0.93f, 0.52f, 0.58f};
+static vec3 viewPos = {0.0f, 0.0f, -10.0f};
+
+static bool showWireframe = false;
+static int keyPressCooldown = 0;
 
 void framebuffer_size_callback(GLFWwindow *_, int new_width, int new_height) {
   width = new_width;
@@ -20,8 +27,16 @@ void framebuffer_size_callback(GLFWwindow *_, int new_width, int new_height) {
 }
 
 void processInput(GLFWwindow *window) {
+  if (keyPressCooldown > 0) {
+    keyPressCooldown--;
+  }
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
+  }
+  if (keyPressCooldown == 0 &&
+      glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    showWireframe = !showWireframe;
+    keyPressCooldown = 20;
   }
 }
 
@@ -38,7 +53,7 @@ int main(int argc, char *argv[]) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window = glfwCreateWindow(800, 600, "GLB Viewer", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(800, 600, "Stl Viewer", NULL, NULL);
   if (window == NULL) {
     printf("Failed to create GLFW window\n");
     glfwTerminate();
@@ -78,7 +93,8 @@ int main(int argc, char *argv[]) {
   unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, va.size*3*sizeof(unsigned int), va.indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, va.size * 3 * sizeof(unsigned int),
+               va.indices, GL_STATIC_DRAW);
 
   // Compile Shaderprogram
   Shaderprogram shaderProgram = createShaderProgram();
@@ -90,7 +106,8 @@ int main(int argc, char *argv[]) {
   while (!glfwWindowShouldClose(window)) {
     processInput(window);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.16f, 0.15f, 0.19f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shaderProgram);
@@ -103,7 +120,7 @@ int main(int argc, char *argv[]) {
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
 
     mat4 view = GLM_MAT4_IDENTITY;
-    glm_translate(view, (vec3){0.0f, 0.0f, -10.0f});
+    glm_translate(view, viewPos);
     int viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view[0]);
 
@@ -117,16 +134,23 @@ int main(int argc, char *argv[]) {
     shaderSetVec3(&shaderProgram, "objectColor", objectColor[0], objectColor[1],
                   objectColor[2]);
 
-    shaderSetVec3(&shaderProgram, "lightPos", lightPos[0]*lightDist, lightPos[1]*lightDist,
-                  lightPos[2]*lightDist);
+    shaderSetVec3(&shaderProgram, "lightPos", lightPos[0] * lightDist,
+                  lightPos[1] * lightDist, lightPos[2] * lightDist);
+
+    shaderSetVec3(&shaderProgram, "viewPos", viewPos[0], viewPos[1],
+                  viewPos[2]);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBindTexture(GL_TEXTURE_2D, tex.texture);
 
-    glDrawElements(GL_TRIANGLES, va.size*3 ,GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, va.size * 3, GL_UNSIGNED_INT, 0);
 
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (showWireframe) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     glfwSwapBuffers(window);
     glfwPollEvents();

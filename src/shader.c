@@ -28,9 +28,10 @@ const char *fragmentShaderSource =
     "uniform vec3 objectColor;\n"
     "uniform vec3 lightColor;\n"
     "uniform vec3 lightPos;\n"
+    "uniform vec3 viewPos;\n"
     "void main()\n"
     "{\n"
-    "   float ambientStrength = 0.2;\n"
+    "   float ambientStrength = 0.3;\n"
     "   vec3 ambient = ambientStrength * lightColor;\n"
 
     "   vec3 norm = normalize(Normal);\n"
@@ -38,7 +39,13 @@ const char *fragmentShaderSource =
     "   float diff = max(dot(norm, lightDir), 0.0);\n"
     "   vec3 diffuse = diff * lightColor;\n"
 
-    "   vec3 result = (ambient + diffuse) * objectColor;\n"
+    "   float specularStrength = 0.5;\n"
+    "   vec3 viewDir = normalize(viewPos - FragPos);\n"
+    "   vec3 reflectDir = reflect(lightDir, norm);\n"
+    "   float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);\n"
+    "   vec3 specular = specularStrength * spec * lightColor;\n"
+
+    "   vec3 result = (ambient + diffuse + specular) * objectColor;\n"
     "   FragColor = vec4(result, 1.0f);\n"
     "}\0";
 
